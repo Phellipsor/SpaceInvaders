@@ -1,33 +1,26 @@
-import sys
 import pygame
 
-from player import Player
-from enemy import Enemy
+from game_settings import Settings
+import game_functions as gf
+from ship import Ship
 
+def run_game():
+    """Ініціалізація гри та створення обєкту екрана"""
+    pygame.init()
+    settings = Settings()
+    screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
+    pygame.display.set_caption("Alien Defense")
+    clock = pygame.time.Clock()
+    ship = Ship(screen)
+    bullets = pygame.sprite.Group()
+    reloaded_bullet = pygame.USEREVENT + 1
 
-pygame.init()
-surface = pygame.display.set_mode((640, 480))
-clock = pygame.time.Clock()
-bg_image = pygame.transform.scale(pygame.image.load("assets/bg.jpg"), (1080,2420))
+    while True:
 
-player = Player(surface)
-touched = False
+        pygame.time.set_timer(gf.update_shots(settings, screen, ship, bullets), settings.bullet_reload)
+        gf.check_events(ship)
+        ship.update_pos()
+        bullets.update()
+        gf.update_screen(settings, screen, ship, bullets)
 
-while True:
-    for ev in pygame.event.get():
-        if ev.type == pygame.QUIT:
-            sys.exit()
-        elif ev.type == pygame.MOUSEBUTTONDOWN:
-            if player.rect.collidepoint(ev.pos):
-                touched = True
-                pygame.mouse.get_rel()
-        elif ev.type == pygame.MOUSEBUTTONUP:
-            touched = False
-    
-    clock.tick(60)
-    player.screen.blit(bg_image, (0,0))  
-    player.blitme() 
-    if touched:
-        player.rect.move_ip(pygame.mouse.get_rel())
-    pygame.display.flip()
-    
+run_game()
